@@ -4,7 +4,8 @@ A production-ready, founder-led strategy journey: five conversational workshops 
 
 ## Run locally
 
-Requires Node.js 22+ and TypeScript (`tsc`).
+Requires Node.js 22+. The project installs its pinned TypeScript compiler with the
+other development dependencies.
 
 ```bash
 cp .env.example .env
