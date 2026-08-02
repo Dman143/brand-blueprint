@@ -7,6 +7,16 @@ const types = { '.html':'text/html; charset=utf-8', '.js':'text/javascript; char
 const server = createServer(async (request, response) => {
   try {
     const pathname = decodeURIComponent(new URL(request.url || '/', 'http://localhost').pathname)
+    if (pathname.startsWith('/api/')) {
+      const name = pathname.slice(5).replace(/[^a-z]/g, '')
+      const { default: handler } = await import(`../api/${name}.mjs`)
+      let raw=''; for await (const chunk of request) raw+=chunk
+      request.body=raw?JSON.parse(raw):{}
+      response.status=(code)=>{ response.statusCode=code; return response }
+      response.json=(value)=>{ response.setHeader('content-type','application/json'); response.end(JSON.stringify(value)) }
+      response.send=(value)=>response.end(value)
+      await handler(request,response); return
+    }
     const requested = pathname === '/' ? 'index.html' : pathname.slice(1)
     const file = resolve(join(base, requested))
     if (file !== base && !file.startsWith(`${base}${sep}`)) throw new Error('Invalid path')
