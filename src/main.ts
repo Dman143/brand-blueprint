@@ -1,10 +1,10 @@
-type Question = { prompt: string; note: string; options?: string[]; placeholder?: string }
+type Question = { prompt: string; note: string; options?: string[]; placeholder?: string; encouragement?: string }
 type Workshop = { title: string; focus: string; introduction: string; questions: Question[] }
 
 const workshops: Workshop[] = [
-  { title: 'Business Foundation', focus: 'Clarity & viability', introduction: 'Before we think about branding, I want to understand the business beneath it. A clear foundation gives every decision that follows a reason.', questions: [
-    { prompt: 'In one sentence, what business are you truly building?', note: 'Avoid describing the product alone. Tell me the change you want this business to create.', placeholder: 'We help…' },
-    { prompt: 'How confident are you that people will pay for this offer?', note: 'Commercial confidence should come from evidence, not optimism.', options: ['Still an assumption', 'Some encouraging signals', 'Validated by paying customers', 'Proven and repeatable'] },
+  { title: 'Business Foundation', focus: 'Clarity & viability', introduction: 'I’m looking for the commercial truth beneath the idea: what you are really building, and what the market has shown you so far. There is no polished answer to perform here—just give me the honest founder’s view.', questions: [
+    { prompt: 'Let’s start with the big picture: what are you really building here?', note: 'Talk to me as you would across a table. Go beyond the product and tell me who it helps, what changes for them, and why that matters to you.', placeholder: 'I’m building a business that…', encouragement: 'Don’t worry about making it sound like a pitch. Clarity matters more than polish.' },
+    { prompt: 'Now, what has convinced you that people will actually pay for it?', note: 'I’m not looking for certainty. Choose the answer closest to the evidence you have today—from an informed hunch to customers buying repeatedly.', options: ['It’s still an informed hunch', 'People have shown real interest', 'Customers have already paid', 'Demand is proven and repeatable'], encouragement: 'Honesty here gives us something useful to build from.' },
   ]},
   { title: 'Market Position', focus: 'Audience & advantage', introduction: 'Strong businesses are not for everyone. Here we will sharpen who matters most, the problem they urgently need solved, and why they should choose you.', questions: [
     { prompt: 'Who is the one customer you most want to win?', note: 'Specificity creates relevance. Describe a person, moment or business stage—not a broad demographic.', placeholder: 'Our best-fit customer is…' },
@@ -70,20 +70,31 @@ function bindHome() {
   }))
 }
 
-function start() { workshopIndex = 0; questionIndex = 0; answers = []; renderQuestion() }
+function start() { workshopIndex = 0; questionIndex = 0; answers = []; renderWorkshopOneIntroduction() }
 function absoluteQuestion() { return workshops.slice(0, workshopIndex).reduce((n, w) => n + w.questions.length, 0) + questionIndex }
+
+function renderWorkshopOneIntroduction() {
+  const workshop = workshops[0]
+  root.innerHTML = shell(`<div class="session-top workshop-one-top"><button class="back" data-home>← <span>Back</span></button><div class="session-progress intro-progress"><div><span>WORKSHOP 1 OF 5</span><strong>${workshop.title}</strong></div><div class="progress-track" aria-label="Workshop progress"><i style="width:0%"></i></div><small>Ready</small></div><button class="save" data-home>Exit review</button></div>
+  <section class="workshop-one-welcome" aria-labelledby="workshop-one-title"><div class="welcome-number" aria-hidden="true">01</div><div class="welcome-content"><span class="eyebrow">A FOUNDER-TO-FOUNDER CONVERSATION</span><h1 id="workshop-one-title">Before we talk about your brand, let’s get clear on the business.</h1><p class="welcome-lead">If we were sitting together, this is where I would begin. Two focused questions will help me understand the ambition behind the idea and the evidence underneath it.</p><div class="welcome-note"><span class="mini-portrait">DB</span><div><p>“You don’t need perfect answers. I’d much rather hear what is true today—that is where useful strategy starts.”</p><small>Daniel Band · Founder</small></div></div><div class="welcome-action"><button class="primary workshop-button" data-begin>Begin the conversation <span>→</span></button><span>2 questions · about 2 minutes · your answers stay private</span></div></div></section>`, true)
+  document.querySelector('[data-begin]')?.addEventListener('click', renderQuestion)
+  document.querySelectorAll('[data-home]').forEach(element => element.addEventListener('click', home))
+}
 
 function renderQuestion() {
   const workshop = workshops[workshopIndex]
   const question = workshop.questions[questionIndex]
   const current = absoluteQuestion()
+  const savedAnswer = answers[current] || ''
+  const isWorkshopOne = workshopIndex === 0
   const field = question.options
-    ? `<div class="options">${question.options.map((option, i) => `<button data-answer="${option}"><span>${String.fromCharCode(65 + i)}</span>${option}</button>`).join('')}</div>`
-    : `<div class="written-answer"><textarea rows="4" maxlength="400" placeholder="${question.placeholder}"></textarea><span>Take your time. A few honest sentences are enough.</span></div>`
-  root.innerHTML = shell(`<div class="session-top"><button class="back" data-back>← <span>Back</span></button><div class="session-progress"><div><span>WORKSHOP ${workshopIndex + 1} OF 5</span><strong>${workshop.title}</strong></div><div class="progress-track"><i style="width:${(current / totalQuestions) * 100}%"></i></div><small>${current + 1} / ${totalQuestions}</small></div><button class="save" data-home>Exit review</button></div>
-  <section class="question-layout"><aside class="founder-intro"><span class="mini-portrait">DB</span><span class="eyebrow">A NOTE FROM DANIEL</span><p>${workshop.introduction}</p><small>Daniel Band · Founder</small></aside><div class="question-panel"><span class="question-count">QUESTION ${questionIndex + 1} · ${workshop.focus.toUpperCase()}</span><h1>${question.prompt}</h1><p class="strategist-note"><strong>My perspective</strong>${question.note}</p>${field}<button class="primary continue" data-next ${question.options ? 'hidden' : ''}>Continue <span>→</span></button></div></section>`, true)
-  document.querySelectorAll<HTMLElement>('[data-answer]').forEach(button => button.addEventListener('click', () => { document.querySelectorAll('[data-answer]').forEach(x => x.classList.remove('selected')); button.classList.add('selected'); window.setTimeout(() => next(button.dataset.answer || ''), 220) }))
-  document.querySelector('[data-next]')?.addEventListener('click', () => { const value = document.querySelector<HTMLTextAreaElement>('textarea')?.value.trim(); if (value) next(value); else document.querySelector('textarea')?.classList.add('invalid') })
+    ? `<div class="options" role="radiogroup" aria-label="Choose the answer closest to your experience">${question.options.map((option, i) => `<button type="button" role="radio" aria-checked="${savedAnswer === option}" data-answer="${option}" class="${savedAnswer === option ? 'selected' : ''}"><span>${String.fromCharCode(65 + i)}</span>${option}</button>`).join('')}</div>`
+    : `<div class="written-answer"><label class="sr-only" for="founder-answer">Your answer</label><textarea id="founder-answer" rows="4" maxlength="400" placeholder="${question.placeholder}">${escapeHtml(savedAnswer)}</textarea><span>${question.encouragement || 'Take your time. A few honest sentences are enough.'}</span></div>`
+  const progress = isWorkshopOne ? ((questionIndex + 1) / workshop.questions.length) * 100 : ((current + 1) / totalQuestions) * 100
+  root.innerHTML = shell(`<div class="session-top ${isWorkshopOne ? 'workshop-one-top' : ''}"><button class="back" data-back>← <span>Back</span></button><div class="session-progress"><div><span>WORKSHOP ${workshopIndex + 1} OF 5</span><strong>${workshop.title}</strong></div><div class="progress-track" role="progressbar" aria-label="${isWorkshopOne ? 'Business Foundation' : 'Review'} progress" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${progress}"><i style="width:${progress}%"></i></div><small>${isWorkshopOne ? `${questionIndex + 1} of ${workshop.questions.length}` : `${current + 1} / ${totalQuestions}`}</small></div><button class="save" data-home>Exit review</button></div>
+  <section class="question-layout ${isWorkshopOne ? 'workshop-one-question' : ''}"><aside class="founder-intro"><span class="mini-portrait">DB</span><span class="eyebrow">DANIEL’S VIEW</span><p>${workshop.introduction}</p><small>Daniel Band · Founder</small></aside><div class="question-panel"><span class="question-count">${isWorkshopOne ? `OUR CONVERSATION · ${questionIndex + 1} OF ${workshop.questions.length}` : `QUESTION ${questionIndex + 1} · ${workshop.focus.toUpperCase()}`}</span><h1>${question.prompt}</h1><p class="strategist-note"><strong>${isWorkshopOne ? 'A useful way to think about it' : 'My perspective'}</strong>${question.note}</p>${field}${question.encouragement && question.options ? `<p class="encouragement">${question.encouragement}</p>` : ''}<button class="primary continue ${isWorkshopOne ? 'workshop-button' : ''}" data-next ${question.options && !isWorkshopOne ? 'hidden' : ''}>${questionIndex === workshop.questions.length - 1 && isWorkshopOne ? 'Complete foundation' : 'Continue'} <span>→</span></button></div></section>`, true)
+  document.querySelectorAll<HTMLElement>('[data-answer]').forEach(button => button.addEventListener('click', () => { document.querySelectorAll<HTMLElement>('[data-answer]').forEach(x => { x.classList.remove('selected'); x.setAttribute('aria-checked', 'false') }); button.classList.add('selected'); button.setAttribute('aria-checked', 'true'); if (!isWorkshopOne) window.setTimeout(() => next(button.dataset.answer || ''), 220) }))
+  document.querySelector('[data-next]')?.addEventListener('click', () => { const value = (document.querySelector<HTMLTextAreaElement>('textarea')?.value || document.querySelector<HTMLElement>('[data-answer].selected')?.dataset.answer || '').trim(); if (value) next(value); else { const field = document.querySelector('textarea') || document.querySelector('.options'); field?.classList.add('invalid'); field?.setAttribute('aria-invalid', 'true') } })
   document.querySelector('[data-back]')?.addEventListener('click', back)
   document.querySelector('[data-home]')?.addEventListener('click', home)
 }
@@ -98,7 +109,7 @@ function next(value: string) {
 function back() {
   if (questionIndex > 0) questionIndex--
   else if (workshopIndex > 0) { workshopIndex--; questionIndex = workshops[workshopIndex].questions.length - 1 }
-  else { home(); return }
+  else { renderWorkshopOneIntroduction(); return }
   renderQuestion()
 }
 
