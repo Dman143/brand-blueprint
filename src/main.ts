@@ -1,51 +1,97 @@
-const icon = (name: string) => `<svg viewBox="0 0 24 24" aria-hidden="true"><use href="#${name}"/></svg>`
+type Question = { prompt: string; note: string; options?: string[]; placeholder?: string }
+type Workshop = { title: string; focus: string; introduction: string; questions: Question[] }
 
-document.body.insertAdjacentHTML('afterbegin', `<svg class="svg-sprite" aria-hidden="true"><defs>
-  <symbol id="arrow" viewBox="0 0 24 24"><path d="M5 12h14m-6-6 6 6-6 6"/></symbol>
-  <symbol id="chevron" viewBox="0 0 24 24"><path d="m9 18 6-6-6-6"/></symbol>
-  <symbol id="check" viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8 12 2.5 2.5L16 9"/></symbol>
-  <symbol id="search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-4-4"/></symbol>
-  <symbol id="spark" viewBox="0 0 24 24"><path d="m12 3 1.6 4.7L18 10l-4.4 2.3L12 17l-1.6-4.7L6 10l4.4-2.3L12 3Z"/></symbol>
-  <symbol id="menu" viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/></symbol>
-  <symbol id="close" viewBox="0 0 24 24"><path d="m6 6 12 12M18 6 6 18"/></symbol>
-  <symbol id="plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
-  <symbol id="download" viewBox="0 0 24 24"><path d="M12 3v12m-4-4 4 4 4-4M5 20h14"/></symbol>
-</defs></svg>`)
-
-const foundations = [
-  ['◎', 'Purpose & vision', 'Define why you exist and where you’re headed.', 'Complete', 'coral'],
-  ['♧', 'Audience', 'Understand the people you’re here to serve.', 'Complete', 'violet'],
-  ['≋', 'Voice & messaging', 'Shape how your brand sounds and speaks.', 'In progress', 'blue'],
-  ['◈', 'Visual identity', 'Bring your brand to life through design.', 'Not started', 'mint'],
+const workshops: Workshop[] = [
+  { title: 'Business Foundation', focus: 'Clarity & viability', introduction: 'Before we think about branding, I want to understand the business beneath it. A clear foundation gives every decision that follows a reason.', questions: [
+    { prompt: 'In one sentence, what business are you truly building?', note: 'Avoid describing the product alone. Tell me the change you want this business to create.', placeholder: 'We help…' },
+    { prompt: 'How confident are you that people will pay for this offer?', note: 'Commercial confidence should come from evidence, not optimism.', options: ['Still an assumption', 'Some encouraging signals', 'Validated by paying customers', 'Proven and repeatable'] },
+  ]},
+  { title: 'Market Position', focus: 'Audience & advantage', introduction: 'Strong businesses are not for everyone. Here we will sharpen who matters most, the problem they urgently need solved, and why they should choose you.', questions: [
+    { prompt: 'Who is the one customer you most want to win?', note: 'Specificity creates relevance. Describe a person, moment or business stage—not a broad demographic.', placeholder: 'Our best-fit customer is…' },
+    { prompt: 'What painful problem are they already trying to solve?', note: 'The strongest propositions connect to a problem your customer already recognises.', placeholder: 'They are frustrated by…' },
+    { prompt: 'What can you credibly offer that alternatives cannot?', note: 'Think beyond features: your method, experience, point of view or way of delivering may be the advantage.', placeholder: 'Unlike the alternatives, we…' },
+  ]},
+  { title: 'Brand Strategy', focus: 'Positioning & meaning', introduction: 'Your brand should make the right promise to the right people. This workshop turns what makes the business valuable into a position people can understand and remember.', questions: [
+    { prompt: 'What do you want to be known for?', note: 'Choose the reputation that would make the greatest commercial difference over the next three years.', placeholder: 'We want to be known as…' },
+    { prompt: 'How clearly can you explain why your offer is worth its price?', note: 'Pricing confidence is often a signal of positioning clarity.', options: ['I struggle to justify it', 'I rely on comparisons', 'I can explain the value', 'Customers readily see the value'] },
+  ]},
+  { title: 'Commercial Growth', focus: 'Marketing & sales', introduction: 'A good brand has to perform in the real world. I want to see how confidently you create demand, lead a sales conversation, and turn attention into revenue.', questions: [
+    { prompt: 'How reliably can you reach the right people?', note: 'Consider whether your marketing creates a consistent flow of relevant opportunities.', options: ['No reliable channel yet', 'Inconsistent activity', 'One channel works', 'A repeatable system works'] },
+    { prompt: 'How confident are you when asking for the sale?', note: 'Be honest here. A strong proposition still needs a confident commercial conversation.', options: ['I avoid selling', 'It feels inconsistent', 'I have a clear process', 'I sell with confidence'] },
+  ]},
+  { title: 'Blueprint Roadmap', focus: 'Readiness & direction', introduction: 'The final step is about making the ambition executable. We will identify what the business can support now and where your focus should go next.', questions: [
+    { prompt: 'Could the business deliver well if demand doubled next month?', note: 'Growth exposes weak systems. Think about capacity, process, people and customer experience.', options: ['Not without disruption', 'With significant strain', 'Mostly, with adjustments', 'Yes, confidently'] },
+    { prompt: 'What should this business make possible in five years?', note: 'Your long-term vision gives us a filter for the opportunities worth pursuing now.', placeholder: 'In five years, the business will…' },
+  ]},
 ]
-const tools = [['Aa','Voice generator','Create on-brand copy in seconds','violet'],['◇','Logo studio','Explore and refine logo directions','coral'],['▤','Brand guidelines','Build your living brand playbook','blue']]
 
-const root = document.querySelector<HTMLDivElement>('#root')
-if (!root) throw new Error('Application root was not found')
-root.innerHTML = `<div class="app-shell">
-<header><a class="logo" href="#top" aria-label="Brand Blueprint home"><span class="logo-mark"><span></span></span><span>brand<span>blueprint</span></span></a>
-<nav aria-label="Main navigation"><a class="active" href="#overview">Overview</a><a href="#foundations">Foundations</a><a href="#tools">Tools</a><button class="nav-close" aria-label="Close menu">${icon('close')}</button></nav>
-<div class="header-actions"><button class="icon-button" aria-label="Search">${icon('search')}</button><button class="icon-button settings" aria-label="Settings">⚙</button><button class="avatar" aria-label="Open profile">JD</button><button class="menu-button" aria-label="Open menu">${icon('menu')}</button></div></header>
-<main id="top"><section class="hero" id="overview"><div class="eyebrow">${icon('spark')} Your brand workspace</div><h1>Good morning, Jamie.</h1><p>Let’s keep building a brand people remember.</p>
-<div class="progress-card"><div class="progress-copy"><span class="progress-number">68<small>%</small></span><div><strong>Your blueprint is taking shape</strong><span>Complete two more foundations to unlock your guidelines.</span></div></div><div class="progress-track" aria-label="Brand blueprint 68% complete"><span></span></div><button data-scroll="foundations">Continue building ${icon('arrow')}</button></div></section>
-<section class="section" id="foundations"><div class="section-heading"><div><span class="kicker">THE FUNDAMENTALS</span><h2>Build your foundation</h2><p>Everything strong starts with clarity.</p></div><button class="text-button">View all ${icon('chevron')}</button></div><div class="foundation-grid">
-${foundations.map(([symbol,title,description,status,color])=>`<button class="foundation-card" data-message="${title} opened"><span class="card-icon ${color}">${symbol}</span><span class="card-content"><strong>${title}</strong><span>${description}</span></span><span class="status ${status.toLowerCase().replace(' ','-')}">${status==='Complete'?icon('check'):''} ${status}</span>${icon('chevron')}</button>`).join('')}</div></section>
-<section class="section tools-section" id="tools"><div class="section-heading"><div><span class="kicker">CREATE WITH CONFIDENCE</span><h2>Your brand toolkit</h2><p>Practical tools, powered by your unique blueprint.</p></div></div><div class="tool-grid">
-${tools.map(([symbol,title,text,color])=>`<article class="tool-card"><span class="tool-icon ${color}">${symbol}</span><div><h3>${title}</h3><p>${text}</p></div><button data-message="${title} is ready" aria-label="Open ${title}">${icon('arrow')}</button></article>`).join('')}
-<button class="new-tool" data-message="More tools are coming soon">${icon('plus')}<span><strong>More tools coming</strong><small>Your toolkit grows with you</small></span></button></div></section>
-<section class="brand-kit section"><div class="brand-preview" aria-hidden="true"><div class="preview-paper"><span class="mini-mark"></span><b>NORTH & KIND</b><i>Thoughtful goods<br>for slower days.</i><div class="swatches"><span></span><span></span><span></span></div></div><div class="preview-card">Aa<span>DM Sans</span></div></div><div class="brand-kit-copy"><span class="kicker">YOUR BRAND, READY TO SHARE</span><h2>Everything in one beautiful place.</h2><p>Your brand guidelines update as your blueprint evolves—so your whole team can stay consistent, always.</p><button data-message="Your guidelines are being prepared">Preview guidelines ${icon('download')}</button></div></section></main>
-<footer><a class="logo" href="#top"><span class="logo-mark"><span></span></span><span>brand<span>blueprint</span></span></a><span>Build something unforgettable.</span><small>© 2026 Brand Blueprint</small></footer><div class="toast" role="status" hidden></div></div>`
+const totalQuestions = workshops.reduce((sum, workshop) => sum + workshop.questions.length, 0)
+const rootElement = document.querySelector<HTMLDivElement>('#root')
+if (!rootElement) throw new Error('Application root was not found')
+const root: HTMLDivElement = rootElement
+let workshopIndex = 0
+let questionIndex = 0
+let answers: string[] = []
 
-const nav = document.querySelector('nav')!
-document.querySelector('.menu-button')?.addEventListener('click', () => nav.classList.add('open'))
-document.querySelector('.nav-close')?.addEventListener('click', () => nav.classList.remove('open'))
-nav.querySelectorAll('a').forEach(link => link.addEventListener('click', () => nav.classList.remove('open')))
-document.querySelector('[data-scroll]')?.addEventListener('click', () => document.querySelector('#foundations')?.scrollIntoView({behavior:'smooth'}))
-let toastTimer = 0
-document.querySelectorAll<HTMLElement>('[data-message]').forEach(button => button.addEventListener('click', () => {
-  const toast = document.querySelector<HTMLDivElement>('.toast')!
-  toast.innerHTML = `${icon('check')}${button.dataset.message}`
-  toast.hidden = false
-  window.clearTimeout(toastTimer)
-  toastTimer = window.setTimeout(() => { toast.hidden = true }, 2400)
-}))
+const mark = `<span class="logo-mark">DB</span>`
+const escapeHtml = (value: string) => value.replace(/[&<>'"]/g, character => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', "'": '&#39;', '"': '&quot;' })[character] || character)
+const shell = (content: string, compact = false) => `<div class="app-shell"><header class="site-header"><a class="logo" data-home href="#">${mark}<span>Brand Blueprint</span></a><div class="founder-signoff"><span>Guided personally by</span><strong>Daniel Band</strong></div></header><main class="${compact ? 'session-main' : ''}">${content}</main><footer><div>${mark}<strong>Daniel Band</strong><span>Founder & Brand Strategist</span></div><p>Thoughtful businesses are built with clarity.</p><small>© 2026 Brand Blueprint</small></footer></div>`
+
+function home() {
+  root.innerHTML = shell(`<section class="hero"><div class="hero-copy"><span class="eyebrow">A FOUNDER-LED BUSINESS REVIEW</span><h1>Let’s build a business<br><em>worth believing in.</em></h1><p>I’ve designed Brand Blueprint to feel like the first conversation I have with every ambitious founder: honest, commercially focused and centred on what will make your business matter.</p><div class="hero-actions"><button class="primary" data-start>Start your private review <span>→</span></button><span>5 workshops · approximately 12 minutes</span></div></div><aside class="daniel-note"><span class="portrait">DB</span><blockquote>“I’ll ask the questions I use in my own consulting work, then turn your answers into a clear strategic direction.”</blockquote><strong>Daniel Band</strong><small>Founder, Brand Blueprint</small></aside></section>
+  <section class="workshops"><div class="section-intro"><span class="eyebrow">YOUR CONSULTING JOURNEY</span><h2>Five focused conversations.<br>One clearer business.</h2><p>This is not a scorecard. It is a structured pause to see your business clearly and decide what deserves your attention.</p></div><div class="workshop-list">${workshops.map((w, i) => `<article><span>0${i + 1}</span><div><h3>${w.title}</h3><p>${w.focus}</p></div><small>${w.questions.length} questions</small></article>`).join('')}</div></section>
+  <section class="promise"><span>MY PROMISE TO YOU</span><p>You won’t receive a generic score. You’ll leave with a considered view of your opportunity, your blind spots and the next decisions I believe will move the business forward.</p><button class="text-link" data-start>Begin the conversation →</button></section>`)
+  bindHome()
+}
+
+function bindHome() {
+  document.querySelectorAll('[data-start]').forEach(el => el.addEventListener('click', start))
+  document.querySelector('[data-home]')?.addEventListener('click', (e) => { e.preventDefault(); home() })
+}
+
+function start() { workshopIndex = 0; questionIndex = 0; answers = []; renderQuestion() }
+function absoluteQuestion() { return workshops.slice(0, workshopIndex).reduce((n, w) => n + w.questions.length, 0) + questionIndex }
+
+function renderQuestion() {
+  const workshop = workshops[workshopIndex]
+  const question = workshop.questions[questionIndex]
+  const current = absoluteQuestion()
+  const field = question.options
+    ? `<div class="options">${question.options.map((option, i) => `<button data-answer="${option}"><span>${String.fromCharCode(65 + i)}</span>${option}</button>`).join('')}</div>`
+    : `<div class="written-answer"><textarea rows="4" maxlength="400" placeholder="${question.placeholder}"></textarea><span>Take your time. A few honest sentences are enough.</span></div>`
+  root.innerHTML = shell(`<div class="session-top"><button class="back" data-back>← <span>Back</span></button><div class="session-progress"><div><span>WORKSHOP ${workshopIndex + 1} OF 5</span><strong>${workshop.title}</strong></div><div class="progress-track"><i style="width:${(current / totalQuestions) * 100}%"></i></div><small>${current + 1} / ${totalQuestions}</small></div><button class="save" data-home>Exit review</button></div>
+  <section class="question-layout"><aside class="founder-intro"><span class="mini-portrait">DB</span><span class="eyebrow">A NOTE FROM DANIEL</span><p>${workshop.introduction}</p><small>Daniel Band · Founder</small></aside><div class="question-panel"><span class="question-count">QUESTION ${questionIndex + 1} · ${workshop.focus.toUpperCase()}</span><h1>${question.prompt}</h1><p class="strategist-note"><strong>My perspective</strong>${question.note}</p>${field}<button class="primary continue" data-next ${question.options ? 'hidden' : ''}>Continue <span>→</span></button></div></section>`, true)
+  document.querySelectorAll<HTMLElement>('[data-answer]').forEach(button => button.addEventListener('click', () => { document.querySelectorAll('[data-answer]').forEach(x => x.classList.remove('selected')); button.classList.add('selected'); window.setTimeout(() => next(button.dataset.answer || ''), 220) }))
+  document.querySelector('[data-next]')?.addEventListener('click', () => { const value = document.querySelector<HTMLTextAreaElement>('textarea')?.value.trim(); if (value) next(value); else document.querySelector('textarea')?.classList.add('invalid') })
+  document.querySelector('[data-back]')?.addEventListener('click', back)
+  document.querySelector('[data-home]')?.addEventListener('click', home)
+}
+
+function next(value: string) {
+  answers[absoluteQuestion()] = value
+  if (questionIndex < workshops[workshopIndex].questions.length - 1) questionIndex++
+  else if (workshopIndex < workshops.length - 1) { workshopIndex++; questionIndex = 0 }
+  else { renderResults(); return }
+  renderQuestion()
+}
+function back() {
+  if (questionIndex > 0) questionIndex--
+  else if (workshopIndex > 0) { workshopIndex--; questionIndex = workshops[workshopIndex].questions.length - 1 }
+  else { home(); return }
+  renderQuestion()
+}
+
+function renderResults() {
+  const business = escapeHtml(answers[0] || 'your business')
+  const audience = escapeHtml(answers[2] || 'your highest-value audience')
+  root.innerHTML = shell(`<section class="results-hero"><span class="eyebrow">YOUR STRATEGIC REVIEW</span><h1>My view of<br>your business.</h1><p>Thank you for answering candidly. I’ve looked across the whole picture—not just the brand, but the commercial foundation that has to support it.</p><div class="reviewer"><span class="portrait">DB</span><div><strong>Prepared by Daniel Band</strong><small>Founder & Brand Strategist</small></div></div></section>
+  <section class="report"><article class="executive"><span>01 · EXECUTIVE SUMMARY</span><h2>You have the ingredients of a valuable business. The next step is turning them into a sharper, more ownable proposition.</h2><p>Your ambition—“${business}”—gives the brand a meaningful direction. My priority would be connecting that ambition more explicitly to what ${audience} values, then building a commercial story your marketing and sales can repeat with confidence.</p></article>
+  <div class="insight-grid"><article><span>02 · BIGGEST OPPORTUNITY</span><h3>Own a more specific position</h3><p>Your strongest growth opportunity is to become unmistakably relevant to one valuable audience. A tighter position will make the offer easier to understand, price and recommend.</p></article><article class="warm"><span>03 · BIGGEST BLIND SPOT</span><h3>Proof needs to match the promise</h3><p>The business has conviction, but the evidence behind its differentiation needs strengthening. Turn customer outcomes into visible proof before investing heavily in reach.</p></article></div>
+  <article class="priorities"><span>04 · IMMEDIATE PRIORITIES</span><h2>What I would focus on next</h2><ol><li><b>01</b><div><strong>Clarify the core proposition</strong><p>Express who you serve, the painful problem you solve and why your approach is meaningfully different.</p></div></li><li><b>02</b><div><strong>Build a value-led sales story</strong><p>Connect your pricing to outcomes and give every sales conversation a consistent, confident structure.</p></div></li><li><b>03</b><div><strong>Create evidence before volume</strong><p>Capture customer language, outcomes and proof; use these to shape the message before scaling marketing.</p></div></li></ol></article>
+  <div class="long-term"><span>05 · LONG-TERM RECOMMENDATIONS</span><h2>Build for the business you intend to become.</h2><p>Over the next 12–24 months, create a distinctive brand system around your strongest commercial truth, establish one dependable route to market, and document the delivery standards that protect the customer experience as you grow.</p></div>
+  <section class="services"><div><span>HOW I CAN HELP</span><h2>Suggested Brand Blueprint services</h2><p>Based on your answers, these are the ways I believe we could create the greatest value together.</p></div><div class="service-list"><article><small>RECOMMENDED</small><h3>Positioning Intensive</h3><p>A focused founder session to sharpen your audience, advantage and value proposition.</p><a href="mailto:daniel@brandblueprint.co">Discuss this with Daniel →</a></article><article><h3>Brand Blueprint Partnership</h3><p>Strategy, identity and commercial messaging built as one coherent system.</p><a href="mailto:daniel@brandblueprint.co">Explore the partnership →</a></article></div></section>
+  <div class="final-note"><span class="portrait">DB</span><div><p>“A blueprint only becomes valuable when you act on it. Start with the first priority, make it real, and let that clarity compound.”</p><strong>Daniel</strong></div><button class="outline" onclick="window.print()">Download review</button></div></section>`)
+  document.querySelector('[data-home]')?.addEventListener('click', (e) => { e.preventDefault(); home() })
+}
+
+home()
