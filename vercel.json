@@ -1,1 +1,5 @@
-{"buildCommand":"npm run build","outputDirectory":"dist","functions":{"api/*.mjs":{"runtime":"nodejs22.x"}},"rewrites":[{"source":"/(.*)","destination":"/$1"}]}
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist"
+}

@@ -37,7 +37,7 @@ npm run build
 npm run preview
 ```
 
-`vercel.json` configures the static build and Node serverless functions. In Vercel, add the environment variables above, deploy, and verify the sender domain in Resend. API errors never discard locally saved workshop answers.
+`vercel.json` declares only the static build command and output directory. Vercel automatically discovers the Node.js functions in `api/` and uses the project’s supported Node.js runtime. In Vercel, add the environment variables above, deploy, and verify the sender domain in Resend. API errors never discard locally saved workshop answers.
 
 Before a production promotion, run the commands above, test one AI-backed generation with `OPENAI_API_KEY`, send one Blueprint and consultation through the verified Resend domain, and compare the web, PDF and email from that same canonical payload. The automated contract suite also covers all workshop/question IDs, persistence, canonical output, PDF generation, endpoint validation, responsive CSS and core accessibility affordances.
 
