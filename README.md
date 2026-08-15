@@ -21,10 +21,14 @@ Open <http://localhost:4173>. Answers save locally as they are typed, survive an
 | `OPENAI_API_KEY` | Enables server-side AI drafting. Without it, the server uses the complete deterministic drafting engine. |
 | `OPENAI_MODEL` | Responses API model (default `gpt-5-mini`). |
 | `RESEND_API_KEY` | Sends Blueprint and consultation emails through Resend. |
+| `ENGINE_BASE_URL` | Base URL for the Strategy Engine admin API. |
+| `DANIEL_TOKEN` | Server-only bearer token used to bind the exact generated First Blueprint hypothesis to its activation candidate. Never use a public-prefixed environment variable. |
 | `EMAIL_FROM` | Verified sender address. |
 | `CONTACT_TO` | Consultation recipient. |
 
 The API validates the same canonical Blueprint object before creating a PDF or email, preventing channel drift. Email deliberately returns a clear unavailable state if Resend is not configured. Consultation requests are logged locally when Resend is absent.
+
+When an Engine handoff supplies `submissionId`, `/api/generate` uses the finalized report model's exact `blueprint.strategicSummary[0]` string for interpretation persistence. Production and Preview Vercel environments must both configure `ENGINE_BASE_URL` and the server-only `DANIEL_TOKEN`. Consultation requests currently notify Daniel only; a separate client confirmation email is not part of the existing product contract.
 
 The workshop is deliberately qualitative: there is no numerical score or opaque grading model. Every one of the 15 answers instead contributes to the strategic Blueprint.
 
